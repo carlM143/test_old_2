@@ -9,7 +9,13 @@ const store = createStore({
     ADD_TASK(state, task) {
       state.tasks.push(task);
     },
-      SET_TASKS(state, tasks) {
+    DELETE_TASK(state, tasktId) {
+      const index = state.tasks.findIndex(task => task.id === tasktId);
+      if (index !== -1) {
+          state.tasks.splice(index, 1);
+      }
+  },
+    SET_TASKS(state, tasks) {
       state.tasks = tasks;
     },
   },
@@ -24,7 +30,7 @@ const store = createStore({
           throw error;
         });
     },
-    getTasks({commit}) {
+    getTasks({ commit }) {
       return axios.get('/api/tasks')
        .then(response => {
           commit('SET_TASKS', response.data);
@@ -33,10 +39,25 @@ const store = createStore({
        .catch(error => {
           throw error;
         });
-    }
-  },
-  modules: {
+    },
+    updateTask({ commit }, taskData) {
+      return axios.put(`/api/tasks/${taskData.id}`, taskData)
+        .then(response => {
+          // Optionally, update the task in the store if needed
+          commit('UPDATE_TASK', response.data);
+          return response.data;
+        })
+        .catch(error => {
+          throw error;
+        });
+    },
+    async deleteProduct({ commit }, tasktId) {
+      await axios.delete(`/api/tasks/${tasktId}`);
+      commit('DELETE_PRODUCT', tasktId);
   }
+  },
+  modules: {}
 });
+
 
 export default store;

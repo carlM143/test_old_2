@@ -18,31 +18,32 @@
 
     <!-- Edit Modal -->
     <b-modal v-model="showEditModal" title="Edit Task">
-      <form @submit.prevent="submitEditForm">
-        <div class="mb-3">
-          <label for="editTitle" class="form-label">Title</label>
-          <b-form-input id="editTitle" v-model="editedItem.title" required></b-form-input>
-        </div>
-        <div class="mb-3">
-          <label for="editDescription" class="form-label">Description</label>
-          <b-form-textarea id="editDescription" v-model="editedItem.description" required></b-form-textarea>
-        </div>
-        <div class="mb-3">
-          <label for="editDueDate" class="form-label">Due Date</label>
-          <b-form-input id="editDueDate" v-model="editedItem.due_date" required></b-form-input>
-        </div>
-        <div class="mb-3">
-          <label for="editStatus" class="form-label">Status</label>
-          <b-form-select id="editStatus" v-model="editedItem.status" :options="statusOptions" required></b-form-select>
-        </div>
-        <b-button type="submit" variant="primary">Update</b-button>
-      </form>
-    </b-modal>
+  <form @submit.prevent="submitEditForm">
+    <div class="mb-3">
+      <label for="editTitle" class="form-label">Title</label>
+      <b-form-input id="editTitle" v-model="editedItem.title" required></b-form-input>
+    </div>
+    <div class="mb-3">
+      <label for="editDescription" class="form-label">Description</label>
+      <b-form-textarea id="editDescription" v-model="editedItem.description" required></b-form-textarea>
+    </div>
+    <div class="mb-3">
+      <label for="editDueDate" class="form-label">Due Date</label>
+      <b-form-input id="editDueDate" v-model="editedItem.due_date" required></b-form-input>
+    </div>
+    <div class="mb-3">
+      <label for="editStatus" class="form-label">Status</label>
+      <b-form-select id="editStatus" v-model="editedItem.status" :options="statusOptions" required></b-form-select>
+    </div>
+    <!-- Add a submit button inside the form -->
+  </form>
+</b-modal>
   </div>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex';
+
 import AddTask from '@/components/AddTask.vue';
 
 export default {
@@ -90,20 +91,36 @@ export default {
   },
 
   methods: {
-    ...mapActions(['getTasks']),
+    ...mapActions(['getTasks', 'updateTask']),
+  
     openEditModal(item) {
-      this.editedItem = { ...item };
-      this.showEditModal = true;
-    },
-    submitEditForm() {
-      const index = this.tasks.findIndex(t => t.id === this.editedItem.id);
-      if (index !== -1) {
-        this.$store.commit('UPDATE_TASK', { index, task: this.editedItem });
+      this.editedItem = { 
+    ...item,
+    status: item.status // Ensure that the status property is included
+  };
+    this.showEditModal = true;
+  },
+
+  submitEditForm() {
+    this.updateTask(this.editedItem)
+      .then(() => {
+        // Update succeeded, close modal or perform any other action
+        this.showEditModal = false;
+      })
+      .catch(error => {
+        // Handle update error
+        console.error('Error updating task:', error);
+      });
+  },
+  async deleteTask(id) {
+      try {
+        console.log('Deleting task with id:', id); // Check if delete operation is triggered
+        await this.$store.dispatch('deleteTask', id);
+        console.log('Task deleted successfully'); // Check if delete operation is successful
+       
+      } catch (error) {
+        console.error('Error deleting task:', error);
       }
-      this.showEditModal = false;
-    },
-    deleteItem(id) {
-      this.$store.commit('DELETE_TASK', id);
     },
     mapStatus(status) {
       return status === 'active' ? 'Active' : 'Expired';
