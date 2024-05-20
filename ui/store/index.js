@@ -1,4 +1,3 @@
-// src/store/index.js
 import { createStore } from 'vuex';
 import axios from '../axiosConfig';  // Adjust the import path
 
@@ -9,22 +8,34 @@ const store = createStore({
   mutations: {
     ADD_TASK(state, task) {
       state.tasks.push(task);
-    }
+    },
+      SET_TASKS(state, tasks) {
+      state.tasks = tasks;
+    },
   },
   actions: {
-    createTask({ commit }, task) {
-      return axios.post('/api/tasks', task)
+    createTask({ commit }, taskData) {
+      return axios.post('/api/tasks', taskData)
         .then(response => {
-          commit('ADD_TASK', response.data.task);
+          commit('ADD_TASK', taskData);
           return response.data;
         })
         .catch(error => {
           throw error;
         });
+    },
+    getTasks({commit}) {
+      return axios.get('/api/tasks')
+       .then(response => {
+          commit('SET_TASKS', response.data);
+          return response.data;
+        })
+       .catch(error => {
+          throw error;
+        });
     }
   },
   modules: {
-    // Add additional modules here if needed
   }
 });
 

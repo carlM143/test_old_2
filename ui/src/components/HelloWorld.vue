@@ -1,12 +1,12 @@
-
 <template>
   <div id="app">
     <b-container>
       <b-row>
         <b-col>
           <h1>User CRUD</h1>
+          <AddTask />
           <br>
-          <b-table :items="items" :fields="fields">
+          <b-table :items="tasksWithStatus" :fields="fields">
             <template #cell(actions)="data">
               <b-button variant="danger" class="me-2" @click="deleteItem(data.item.id)">Delete</b-button>
               <b-button variant="primary" @click="openEditModal(data.item)">Edit</b-button>
@@ -42,10 +42,16 @@
 </template>
 
 <script>
-import axios from 'axios';
-axios.defaults.baseURL = 'http://your-laravel-app.test/api'; // Change this to your actual Laravel app URL
+import { mapState, mapActions } from 'vuex';
+import AddTask from '@/components/AddTask.vue';
+
 export default {
   name: 'HelloWorld',
+
+  components: {
+    AddTask
+  },
+
   data() {
     return {
       fields: [
@@ -56,49 +62,56 @@ export default {
         { key: 'status', label: 'Status' },
         { key: 'actions', label: 'Actions' }
       ],
-      items: [
-        { id: 1, title: 'John Doe', description: 'Lorem ipsum', due_date: '2024-04-10', status: 'Expired' },
-        { id: 2, title: 'Jane Smith', description: 'Dolor sit amet', due_date: '2024-04-10', status: 'Active' },
-        { id: 3, title: 'Sam Green', description: 'Consectetur adipiscing elit', due_date: '2024-04-10', status: 'Active' },
-        { id: 4, title: 'Sam Green', description: 'Sed do eiusmod tempor', due_date: '2024-04-10', status: 'Active' }
+      statusOptions: [
+        { value: 'active', text: 'Active' },
+        { value: 'expired', text: 'Expired' }
       ],
       showEditModal: false,
-      editedItem: {},
-      statusOptions: [
-        { value: 'Active', text: 'Active' },
-        { value: 'Expired', text: 'Expired' },
-      ]
+      editedItem: {}
     };
   },
+
+  computed: {
+    ...mapState({
+      tasks: state => state.tasks
+    }),
+    tasksWithStatus() {
+      if (!this.tasks) return [];
+
+      return this.tasks.map(task => {
+        if (!task) return null;
+
+        return {
+          ...task,
+          status: this.mapStatus(task.status)
+        };
+      });
+    }
+  },
+
   methods: {
-    deleteItem(id) {
-      console.log("Delete item with ID: ", id);
-    },
+    ...mapActions(['getTasks']),
     openEditModal(item) {
       this.editedItem = { ...item };
       this.showEditModal = true;
     },
     submitEditForm() {
-      const index = this.items.findIndex(item => item.id === this.editedItem.id);
+      const index = this.tasks.findIndex(t => t.id === this.editedItem.id);
       if (index !== -1) {
-        this.items.splice(index, 1, { ...this.editedItem });
+        this.$store.commit('UPDATE_TASK', { index, task: this.editedItem });
       }
       this.showEditModal = false;
+    },
+    deleteItem(id) {
+      this.$store.commit('DELETE_TASK', id);
+    },
+    mapStatus(status) {
+      return status === 'active' ? 'Active' : 'Expired';
     }
+  },
+
+  created() {
+    this.getTasks();
   }
 };
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-.modal-footer {
-    display: none;
-}
-</style>

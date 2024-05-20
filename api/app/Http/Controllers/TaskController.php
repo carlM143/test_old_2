@@ -19,7 +19,7 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'due_date' => 'required|date',
-            'status' => 'required|in:Active,Expired'
+            'status' => 'required|in:active,expired'
         ]);
 
         $task = Task::create($request->all());

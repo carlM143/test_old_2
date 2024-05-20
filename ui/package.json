@@ -1,6 +1,7 @@
 {
   "name": "ui",
   "version": "0.1.0",
+  
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -39,7 +40,8 @@
       "eslint:recommended"
     ],
     "parserOptions": {
-      "parser": "@babel/eslint-parser"
+      "parser": "@babel/eslint-parser",
+      "requireConfigFile": false
     },
     "rules": {}
   },

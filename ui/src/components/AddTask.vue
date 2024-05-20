@@ -20,11 +20,11 @@
                 <input type="text" class="form-control" id="title" v-model="form.title" required>
               </div>
               <div class="mb-3">
-                <label for="text" class="form-label">Description</label>
-                <textarea type="text" class="form-control" id="description" v-model="form.description" required></textarea>
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" v-model="form.description" required></textarea>
               </div>
               <div class="mb-3">
-                <label for="description" class="form-label">Due Date</label>
+                <label for="due_date" class="form-label">Due Date</label>
                 <input type="date" class="form-control" id="due_date" v-model="form.due_date" required>
               </div>
               <div class="mb-3">
@@ -56,13 +56,13 @@ export default {
       },
       options: [
         { value: null, text: 'Please select an option' },
-        { value: 'Active', text: 'Active' },
-        { value: 'Expired', text: 'Expired' }
+        { value: 'active', text: 'Active' },
+        { value: 'expired', text: 'Expired' }
       ]
     };
   },
   methods: {
-    ...mapActions(['createTask']),
+    ...mapActions(['createTask', 'getTasks']),
     submitForm() {
       this.createTask(this.form)
         .then(response => {
@@ -73,6 +73,7 @@ export default {
           });
           this.resetForm();
           this.hideModal();
+          this.refreshTasks();
         })
         .catch(error => {
           Swal.fire({
@@ -91,10 +92,12 @@ export default {
       };
     },
     hideModal() {
-      const modal = Modal.getInstance(document.getElementById('taskModal'));
-      if (modal) {
-        modal.hide();
-      }
+      const modalElement = document.getElementById('taskModal');
+      const modalInstance = Modal.getInstance(modalElement) || new Modal(modalElement);
+      modalInstance.hide();
+    },
+    refreshTasks() {
+      this.getTasks();
     }
   }
 };
