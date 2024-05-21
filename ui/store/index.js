@@ -9,21 +9,27 @@ const store = createStore({
     ADD_TASK(state, task) {
       state.tasks.push(task);
     },
-    DELETE_TASK(state, tasktId) {
-      const index = state.tasks.findIndex(task => task.id === tasktId);
+    DELETE_TASK(state, taskId) {
+      const index = state.tasks.findIndex(task => task.id === taskId);
       if (index !== -1) {
-          state.tasks.splice(index, 1);
+        state.tasks.splice(index, 1);
       }
-  },
+    },
     SET_TASKS(state, tasks) {
       state.tasks = tasks;
     },
+    UPDATE_TASK(state, updatedTask) {
+      const index = state.tasks.findIndex(task => task.id === updatedTask.id);
+      if (index !== -1) {
+        state.tasks.splice(index, 1, updatedTask);
+      }
+    }
   },
   actions: {
     createTask({ commit }, taskData) {
       return axios.post('/api/tasks', taskData)
         .then(response => {
-          commit('ADD_TASK', taskData);
+          commit('ADD_TASK', response.data);
           return response.data;
         })
         .catch(error => {
@@ -32,18 +38,17 @@ const store = createStore({
     },
     getTasks({ commit }) {
       return axios.get('/api/tasks')
-       .then(response => {
+        .then(response => {
           commit('SET_TASKS', response.data);
           return response.data;
         })
-       .catch(error => {
+        .catch(error => {
           throw error;
         });
     },
     updateTask({ commit }, taskData) {
       return axios.put(`/api/tasks/${taskData.id}`, taskData)
         .then(response => {
-          // Optionally, update the task in the store if needed
           commit('UPDATE_TASK', response.data);
           return response.data;
         })
@@ -51,13 +56,12 @@ const store = createStore({
           throw error;
         });
     },
-    async deleteProduct({ commit }, tasktId) {
-      await axios.delete(`/api/tasks/${tasktId}`);
-      commit('DELETE_PRODUCT', tasktId);
-  }
+    async deleteTask({ commit }, taskId) {
+      await axios.delete(`/api/tasks/${taskId}`);
+      commit('DELETE_TASK', taskId);
+    }
   },
   modules: {}
 });
-
 
 export default store;
